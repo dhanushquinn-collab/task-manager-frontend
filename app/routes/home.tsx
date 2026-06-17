@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 interface Task {
   _id: string;
@@ -9,49 +10,83 @@ interface Task {
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTask, setNewTask] = useState<string>("");
+  const navigate = useNavigate();
+
+function handleLogout() {
+  localStorage.removeItem("token");
+  navigate("/login");
+}
 
   // Fetch all tasks when page loads
   useEffect(() => {
-    fetch("http://localhost:3000/tasks")
-      .then((res) => res.json())
-      .then((data: Task[]) => setTasks(data));
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    navigate("/login");
+    return;
+  }
+
+  fetch("http://localhost:3000/tasks", {
+    headers: { Authorization: token },
+  })
+    .then((res) => res.json())
+    .then((data: Task[]) => setTasks(data));
   }, []);
 
   // Add a new task
   function addTask() {
-    if (newTask.trim() === "") return;
-    fetch("http://localhost:3000/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: newTask }),
-    })
-      .then((res) => res.json())
-      .then((data: Task) => {
-        setTasks([...tasks, data]);
-        setNewTask("");
-      });
-  }
+  if (newTask.trim() === "") return;
+  const token = localStorage.getItem("token");
+  fetch("http://localhost:3000/tasks", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: token || "",
+    },
+    body: JSON.stringify({ title: newTask }),
+  })
+    .then((res) => res.json())
+    .then((data: Task) => {
+      setTasks([...tasks, data]);
+      setNewTask("");
+    });
+}
 
   // Toggle complete/incomplete
   function toggleTask(id: string) {
-    fetch(`http://localhost:3000/tasks/${id}`, { method: "PATCH" })
-      .then((res) => res.json())
-      .then((updated: Task) => {
-        setTasks(tasks.map((task) => task._id === updated._id ? updated : task));
-      });
-  }
+  const token = localStorage.getItem("token");
+  fetch(`http://localhost:3000/tasks/${id}`, {
+    method: "PATCH",
+    headers: { Authorization: token || "" },
+  })
+    .then((res) => res.json())
+    .then((updated: Task) => {
+      setTasks(tasks.map((task) => task._id === updated._id ? updated : task));
+    });
+}
 
   // Delete a task
   function deleteTask(id: string) {
-    fetch(`http://localhost:3000/tasks/${id}`, { method: "DELETE" })
-      .then(() => {
-        setTasks(tasks.filter((task) => task._id !== id));
-      });
-  }
+  const token = localStorage.getItem("token");
+  fetch(`http://localhost:3000/tasks/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: token || "" },
+  })
+    .then(() => {
+      setTasks(tasks.filter((task) => task._id !== id));
+    });
+}
 
   return (
     <div style={{ maxWidth: "600px", margin: "40px auto", padding: "20px" }}>
       <h1>Task Manager</h1>
+
+      <button
+        onClick={handleLogout}
+        style={{ padding: "8px 16px", background: "#f44336", color: "white", border: "none", borderRadius: "5px", cursor: "pointer", marginBottom: "20px" }}
+      >
+        Logout
+      </button>
 
       {/* Add Task Input */}
       <div style={{ display: "flex", gap: "10px", marginBottom: "20px" }}>
