@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
+import { API_URL } from "../config";
 
 interface Task {
   _id: string;
@@ -26,7 +27,7 @@ function handleLogout() {
     return;
   }
 
-  fetch("http://localhost:3000/tasks", {
+  fetch(`${API_URL}/tasks`, {
     headers: { Authorization: token },
   })
     .then((res) => res.json())
@@ -37,7 +38,7 @@ function handleLogout() {
   function addTask() {
   if (newTask.trim() === "") return;
   const token = localStorage.getItem("token");
-  fetch("http://localhost:3000/tasks", {
+  fetch(`${API_URL}/tasks`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -55,7 +56,7 @@ function handleLogout() {
   // Toggle complete/incomplete
   function toggleTask(id: string) {
   const token = localStorage.getItem("token");
-  fetch(`http://localhost:3000/tasks/${id}`, {
+  fetch(`${API_URL}/tasks/${id}`, {
     method: "PATCH",
     headers: { Authorization: token || "" },
   })
@@ -68,7 +69,7 @@ function handleLogout() {
   // Delete a task
   function deleteTask(id: string) {
   const token = localStorage.getItem("token");
-  fetch(`http://localhost:3000/tasks/${id}`, {
+  fetch(`${API_URL}/tasks/${id}`, {
     method: "DELETE",
     headers: { Authorization: token || "" },
   })

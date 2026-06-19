@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { API_URL } from "../config";
 
 export default function Signup() {
   const [username, setUsername] = useState<string>("");
@@ -7,7 +8,7 @@ export default function Signup() {
   const navigate = useNavigate();
 
   function handleSignup() {
-    fetch("http://localhost:3000/signup", {
+    fetch(`${API_URL}/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),

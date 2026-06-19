@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { API_URL } from "../config";
 
 export default function Login() {
   const [username, setUsername] = useState<string>("");
@@ -7,7 +8,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   function handleLogin() {
-    fetch("http://localhost:3000/login", {
+    fetch(`${API_URL}/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password }),
